@@ -20,6 +20,13 @@
             <q-rating v-model="business.rating" :max="5" size="32px" />
           </div>
         </div>
+        <div class="row q-pt-md">
+          <div class="col">
+            {{ business.display_phone }}
+            {{ business.location.display_address.join(" ") }}
+          </div>
+        </div>
+
         <div class="row">
           <div class="col q-pt-md">
             <q-list bordered class="rounded-borders">
@@ -120,7 +127,11 @@ const $route = getCurrentInstance().appContext.config.globalProperties.$route;
 
 const showDialog = ref(false);
 const messageDialog = ref("");
-const business = ref({});
+const business = ref({
+  location: {
+    display_address: [],
+  },
+});
 const slide = ref(1);
 const zoom = ref(2);
 const center = ref([0, 0]);
