@@ -21,7 +21,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="q-pa-md q-gutter-md">
+          <div class="col q-pt-md">
             <q-list bordered class="rounded-borders">
               <q-item-label header>Reviews</q-item-label>
               <div v-for="(review, index) in reviews" :key="review.id">
