@@ -18,7 +18,7 @@
         <q-rating v-model="business.rating" :max="5" size="32px" />
       </div>
       <div class="col">
-        <div class="row">
+        <div class="row q-pa-md">
           <div class="col">
             <q-list bordered padding>
               <q-item-label header>Categories</q-item-label>
@@ -39,6 +39,27 @@
             </q-list>
           </div>
         </div>
+        <!-- maps -->
+        <div class="row q-pa-md">
+          <div class="col">
+            <div style="height: 300px; width: 405px">
+              <l-map
+                ref="map"
+                v-model:zoom="zoom"
+                :center="center"
+                :use-global-leaflet="false"
+              >
+                <l-tile-layer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  layer-type="base"
+                  name="OpenStreetMap"
+                  :attribution="attribut"
+                ></l-tile-layer>
+                <l-marker :lat-lng="center"></l-marker>
+              </l-map>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="q-pa-md row items-start q-gutter-md"></div>
@@ -52,6 +73,9 @@ import MyDialog from "src/components/MyDialog.vue";
 import { onMounted } from "vue";
 import { useQuasar } from "quasar";
 
+import "leaflet/dist/leaflet.css";
+import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
+
 const $q = useQuasar();
 
 const $api = getCurrentInstance().appContext.config.globalProperties.$api;
@@ -61,7 +85,10 @@ const showDialog = ref(false);
 const messageDialog = ref("");
 const business = ref({});
 const slide = ref(1);
-
+const zoom = ref(2);
+const center = ref([0, 0]);
+const attribut =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 function getBusinessDetail(id) {
   console.log("get business");
   $q.loading.show({
@@ -73,7 +100,11 @@ function getBusinessDetail(id) {
     .then((res) => {
       const { data } = res;
       business.value = data || {};
-      console.log(business.value);
+      center.value = [
+        parseFloat(business.value.coordinates.latitude),
+        parseFloat(business.value.coordinates.longitude),
+      ];
+      console.log(center.value);
     })
     .catch((e) => {
       messageDialog.value = e.message;
