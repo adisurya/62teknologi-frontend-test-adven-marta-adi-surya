@@ -14,8 +14,45 @@
     </div>
     <div class="row q-pa-md">
       <div class="col col-8">
-        <h4>{{ business.name }}</h4>
-        <q-rating v-model="business.rating" :max="5" size="32px" />
+        <div class="row">
+          <div class="col">
+            <h4>{{ business.name }}</h4>
+            <q-rating v-model="business.rating" :max="5" size="32px" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="q-pa-md q-gutter-md">
+            <q-list bordered class="rounded-borders">
+              <q-item-label header>Reviews</q-item-label>
+              <div v-for="(review, index) in reviews" :key="review.id">
+                <q-item v-ripple>
+                  <q-item-section avatar>
+                    <q-avatar>
+                      <img :src="review.user.image_url" />
+                    </q-avatar>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label lines="1">
+                      <q-rating v-model="review.rating" :max="5" size="14px" />
+                    </q-item-label>
+                    <q-item-label caption lines="2">
+                      <span class="text-weight-bold">{{
+                        review.user.name
+                      }}</span>
+                      -- {{ review.text }}
+                    </q-item-label>
+                  </q-item-section>
+
+                  <q-item-section side top class="text-caption">
+                    {{ review.time_created }}
+                  </q-item-section>
+                </q-item>
+                <q-separator v-if="index != reviews.length - 1"></q-separator>
+              </div>
+            </q-list>
+          </div>
+        </div>
       </div>
       <div class="col">
         <div class="row q-pa-md">
@@ -89,6 +126,9 @@ const zoom = ref(2);
 const center = ref([0, 0]);
 const attribut =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+const reviews = ref([]);
+
 function getBusinessDetail(id) {
   console.log("get business");
   $q.loading.show({
@@ -101,10 +141,33 @@ function getBusinessDetail(id) {
       const { data } = res;
       business.value = data || {};
       center.value = [
-        parseFloat(business.value.coordinates.latitude),
-        parseFloat(business.value.coordinates.longitude),
+        business.value.coordinates.latitude,
+        business.value.coordinates.longitude,
       ];
-      console.log(center.value);
+      console.log(business.value);
+    })
+    .catch((e) => {
+      messageDialog.value = e.message;
+      showDialog.value = true;
+    })
+    .finally(() => {
+      $q.loading.hide();
+    });
+}
+
+// /businesses/business_id_or_alias/reviews?limit=20&sort_by=yelp_sort
+
+function getReviews(id) {
+  console.log("get business");
+  $q.loading.show({
+    delay: 400, // ms
+  });
+
+  $api
+    .get(`/businesses/${id}/reviews?limit=50&sort_by=yelp_sort`)
+    .then((res) => {
+      const { data } = res;
+      reviews.value = data.reviews || [];
     })
     .catch((e) => {
       messageDialog.value = e.message;
@@ -117,6 +180,7 @@ function getBusinessDetail(id) {
 
 onMounted(() => {
   getBusinessDetail($route.params.id);
+  getReviews($route.params.id);
 });
 </script>
 <style scoped>
